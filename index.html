@@ -956,7 +956,10 @@ window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('mainNav').style.display = 'flex';
       loadDashboard();
     } else {
-      showScreen('screen-welcome');
+      // Directly show welcome screen
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-welcome').classList.add('active');
+      window.scrollTo(0,0);
     }
   }, 2800);
 });
