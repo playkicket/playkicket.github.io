@@ -668,16 +668,35 @@ window.openDash = openDash;
 
 // ─── LOAD STATS (live, global) ───
 function loadStats() {
-  const {db,ref,onValue} = window._db;
+  const {db,ref,onValue,get} = window._db;
   onValue(ref(db,'matched/stats'), snap => {
     S.stats = snap.exists() ? snap.val() : {};
-    // refresh dashboard if open
     const club = getActiveClub();
     if (club) {
       updateScore();
       if (club.locked) showSquad();
+      // Re-render leaderboard with updated stats
+      const lbList = document.getElementById('lbList');
+      if (lbList) {
+        get(ref(db,`matched/clubs/${S.activeCode}/members`)).then(snap => {
+          if (!snap.exists()) return;
+          const members = snap.val();
+          const entries = Object.entries(members)
+            .map(([uid,m]) => ({uid, name:m.name, score: m.squad ? calcScore(m.squad) : 0}))
+            .sort((a,b) => b.score - a.score);
+          const myIdx = entries.findIndex(e => e.uid === S.uid);
+          document.getElementById('myRank').textContent = myIdx >= 0 ? '#'+(myIdx+1) : '#—';
+          document.getElementById('topScore').textContent = entries[0] ? entries[0].score.toFixed(1) : '0';
+          lbList.innerHTML = entries.map((e,i) => `
+            <div class="lb-row ${e.uid===S.uid?'you':''}">
+              <div class="lb-rank">${i===0?'🏆':i===1?'🥈':i===2?'🥉':i+1}</div>
+              <div class="lb-name">${e.name}${e.uid===S.uid?' (You)':''}</div>
+              <div class="lb-score">${e.score.toFixed(1)}</div>
+            </div>`).join('');
+        });
+      }
     }
-    renderHome(); // refresh squad status on home
+    renderHome();
   });
 }
 
