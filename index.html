@@ -51,6 +51,8 @@ body {
 .btn-primary:hover { opacity:0.9; transform:translateY(-1px); }
 .btn-secondary { background:var(--w10); color:white; border:1px solid var(--w20); }
 .btn-secondary:hover { background:var(--w20); }
+.btn-ghost { background:none; color:var(--w60); border:none; font-size:13px; padding:10px; width:100%; cursor:pointer; font-family:'DM Sans',sans-serif; text-decoration:underline; text-underline-offset:3px; }
+.btn-ghost:hover { color:white; }
 .btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
 .lbl { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--w60); margin-bottom:8px; display:block; }
 input[type=text], input[type=number], select {
@@ -66,6 +68,9 @@ select option { background:#3d7a1e; color:white; }
 .code-box { background:var(--w10); border:1px solid var(--w20); border-radius:12px; padding:20px; text-align:center; margin:20px 0; }
 .code-lbl { font-size:11px; letter-spacing:3px; color:var(--w60); text-transform:uppercase; margin-bottom:8px; }
 .code-val { font-family:'Abril Fatface',cursive; font-size:24px; letter-spacing:3px; color:white; word-break:break-all; }
+.recovery-box { background:rgba(0,0,0,0.4); border:2px solid var(--w20); border-radius:16px; padding:24px; text-align:center; margin:20px 0; }
+.recovery-code-display { font-family:'Abril Fatface',cursive; font-size:22px; letter-spacing:4px; color:white; margin:12px 0; word-break:break-all; line-height:1.4; }
+.recovery-warning { font-size:12px; color:var(--w60); line-height:1.7; margin-top:12px; }
 .dh { display:flex; align-items:center; justify-content:space-between; padding:20px 16px 0; }
 .club-name { font-family:'Abril Fatface',cursive; font-size:20px; }
 .club-sub { font-size:11px; color:var(--w60); }
@@ -159,7 +164,8 @@ select option { background:#3d7a1e; color:white; }
   </div>
   <div style="padding:0 16px 12px">
     <button class="btn btn-primary" style="margin-bottom:10px" onclick="go('screen-create')">+ Create a Clubhouse</button>
-    <button class="btn btn-secondary" onclick="go('screen-join')">+ Join a Clubhouse</button>
+    <button class="btn btn-secondary" style="margin-bottom:6px" onclick="go('screen-join')">+ Join a Clubhouse</button>
+    <button class="btn-ghost" onclick="go('screen-recover')">Recover my Account</button>
   </div>
   <div style="padding:20px 16px 8px;font-size:11px;color:var(--w60);letter-spacing:2px;text-transform:uppercase">My Clubhouses</div>
   <div id="myClubsList">
@@ -210,6 +216,23 @@ select option { background:#3d7a1e; color:white; }
   </div>
 </div>
 
+<!-- RECOVERY CODE SCREEN — shown after name is saved for first time -->
+<div class="screen" id="screen-recoverycode">
+  <div style="padding:32px 16px 0">
+    <div class="stitle">Save Your Recovery Code</div>
+    <div class="ssub">You'll need this if you switch devices or clear your browser</div>
+  </div>
+  <div class="card">
+    <div class="recovery-box">
+      <div class="code-lbl">Your Recovery Code</div>
+      <div class="recovery-code-display" id="myRecoveryCode">—</div>
+      <div class="recovery-warning">Screenshot this or save it somewhere safe.<br>This is the only way to recover your account.</div>
+    </div>
+    <button class="btn btn-primary" style="margin-bottom:12px" onclick="copyRecoveryCode()">Copy Code</button>
+    <button class="btn btn-secondary" onclick="afterRecoveryCode()">I've saved it →</button>
+  </div>
+</div>
+
 <!-- JOIN CLUBHOUSE -->
 <div class="screen" id="screen-join">
   <div style="padding:32px 16px 0">
@@ -220,6 +243,20 @@ select option { background:#3d7a1e; color:white; }
     <label class="lbl">Clubhouse Code</label>
     <input type="text" id="joinCode" placeholder="e.g. MatchedAB12CD34" maxlength="15" style="letter-spacing:2px">
     <button class="btn btn-primary" onclick="joinClubhouse()">Find Clubhouse →</button>
+  </div>
+</div>
+
+<!-- RECOVER ACCOUNT -->
+<div class="screen" id="screen-recover">
+  <div style="padding:32px 16px 0">
+    <div class="stitle">Recover my Account</div>
+    <div class="ssub">Enter your recovery code to restore everything</div>
+  </div>
+  <div class="card">
+    <label class="lbl">Recovery Code</label>
+    <input type="text" id="recoverCodeInput" placeholder="Matched-XXXX-XXXX" maxlength="20" style="letter-spacing:2px">
+    <button class="btn btn-primary" onclick="recoverAccount()">Restore my Account →</button>
+    <button class="btn-ghost" style="margin-top:8px" onclick="go('screen-home')">Back</button>
   </div>
 </div>
 
@@ -333,7 +370,6 @@ select option { background:#3d7a1e; color:white; }
       <option value="RR">RR</option><option value="SRH">SRH</option><option value="GT">GT</option><option value="LSG">LSG</option>
     </select>
 
-    <!-- Team Won toggle — shown after team selected -->
     <div id="admTeamWonRow" style="display:none">
       <div class="adm-team-won">
         <div>
@@ -487,10 +523,19 @@ const S = {
   name: '',
   clubs: [],
   activeCode: '',
-  playerPoints: {},  // matched/playerPoints — cumulative points per player id
+  playerPoints: {},
   logoTaps: 0,
-  pin: ''
+  pin: '',
+  recoveryCode: null   // Matched-XXXX-XXXX
 };
+
+// ─── RECOVERY CODE GENERATION ───
+// Format: Matched-XXXX-XXXX (uppercase letters + numbers, no ambiguous chars)
+function genRecoveryCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const seg = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+  return `Matched-${seg()}-${seg()}`;
+}
 
 function saveClubs() { localStorage.setItem('m_clubs', JSON.stringify(S.clubs)); }
 function loadClubsFromStorage() {
@@ -512,6 +557,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (!uid) { uid = 'u_' + Math.random().toString(36).substr(2,9); localStorage.setItem('m_uid', uid); }
   S.uid = uid;
   S.name = localStorage.getItem('m_name') || '';
+  S.recoveryCode = localStorage.getItem('m_recovery') || null;
   loadClubsFromStorage();
   loadPlayerPoints();
   renderHome();
@@ -601,16 +647,29 @@ window.joinClubhouse = function() {
   });
 };
 
+// ─── SAVE NAME ───
 window.saveName = function() {
   const name = document.getElementById('nameInput').value.trim();
   if (!name) { toast('Please enter your name'); return; }
   S.name = name;
   localStorage.setItem('m_name', name);
+
+  // Generate and save recovery code if first time
+  if (!S.recoveryCode) {
+    const rc = genRecoveryCode();
+    S.recoveryCode = rc;
+    localStorage.setItem('m_recovery', rc);
+    // Save to Firebase so it can be looked up during recovery
+    const {db,ref,set} = window._db;
+    set(ref(db, `matched/users/${rc}`), { uid: S.uid, name, at: Date.now() });
+  }
+
   const pendingCreate = localStorage.getItem('m_pending_create_name');
   if (pendingCreate) {
     localStorage.removeItem('m_pending_create_name');
     document.getElementById('createName').value = pendingCreate;
-    window.createClubhouse(); return;
+    showRecoveryCode(() => window.createClubhouse());
+    return;
   }
   const pendingJoin = localStorage.getItem('m_pending_join');
   if (pendingJoin) {
@@ -620,16 +679,86 @@ window.saveName = function() {
       const {db,ref,set} = window._db;
       set(ref(db, `matched/clubs/${pendingJoin}/members/${S.uid}`), {name, at: Date.now(), squad: []});
       S.activeCode = pendingJoin;
-      openDash(); return;
+      showRecoveryCode(() => openDash());
+      return;
     }
   }
   const club = getActiveClub();
   if (club) {
     const {db,ref,set} = window._db;
     set(ref(db, `matched/clubs/${club.code}/members/${S.uid}`), {name, at: Date.now(), squad: club.squad});
-    openDash();
-  } else { renderHome(); go('screen-home'); }
+    showRecoveryCode(() => openDash());
+  } else {
+    showRecoveryCode(() => { renderHome(); go('screen-home'); });
+  }
 };
+
+// ─── SHOW RECOVERY CODE SCREEN ───
+// Shows recovery code, then calls callback when user taps "I've saved it"
+let _afterRecoveryCallback = null;
+function showRecoveryCode(callback) {
+  _afterRecoveryCallback = callback;
+  document.getElementById('myRecoveryCode').textContent = S.recoveryCode;
+  go('screen-recoverycode');
+}
+
+window.copyRecoveryCode = function() {
+  navigator.clipboard.writeText(S.recoveryCode).then(() => toast('Recovery code copied!'));
+};
+
+window.afterRecoveryCode = function() {
+  if (_afterRecoveryCallback) { _afterRecoveryCallback(); _afterRecoveryCallback = null; }
+  else { renderHome(); go('screen-home'); }
+};
+
+// ─── RECOVER ACCOUNT ───
+window.recoverAccount = function() {
+  const code = document.getElementById('recoverCodeInput').value.trim();
+  if (!code) { toast('Please enter your recovery code'); return; }
+
+  const {db,ref,get} = window._db;
+  get(ref(db, `matched/users/${code}`)).then(snap => {
+    if (!snap.exists()) {
+      toast('Code not found. Please check and try again.');
+      return;
+    }
+    const data = snap.val();
+    // Restore identity
+    S.uid = data.uid;
+    S.name = data.name;
+    S.recoveryCode = code;
+    localStorage.setItem('m_uid', data.uid);
+    localStorage.setItem('m_name', data.name);
+    localStorage.setItem('m_recovery', code);
+
+    // Restore clubs from Firebase — find all clubhouses this uid is a member of
+    get(ref(db, 'matched/clubs')).then(clubsSnap => {
+      if (!clubsSnap.exists()) { finishRecover(); return; }
+      const allClubs = clubsSnap.val();
+      const restored = [];
+      Object.entries(allClubs).forEach(([code, club]) => {
+        if (club.members && club.members[data.uid]) {
+          const member = club.members[data.uid];
+          restored.push({
+            code,
+            name: club.name,
+            squad: member.squad || [],
+            locked: !!(member.squad && member.squad.length === 11)
+          });
+        }
+      });
+      S.clubs = restored;
+      saveClubs();
+      finishRecover();
+    });
+  });
+};
+
+function finishRecover() {
+  toast(`Welcome back, ${S.name}!`);
+  renderHome();
+  go('screen-home');
+}
 
 // ─── DASHBOARD ───
 function openDash() {
@@ -644,8 +773,7 @@ function openDash() {
 }
 window.openDash = openDash;
 
-// ─── LOAD PLAYER POINTS (live, global) ───
-// matched/playerPoints/{playerId} = cumulative season points (grows with every match)
+// ─── LOAD PLAYER POINTS (live) ───
 function loadPlayerPoints() {
   const {db,ref,onValue,get} = window._db;
   onValue(ref(db,'matched/playerPoints'), snap => {
@@ -654,7 +782,6 @@ function loadPlayerPoints() {
     if (club) {
       updateScore();
       if (club.locked) showSquad();
-      // Refresh leaderboard live
       const lbList = document.getElementById('lbList');
       if (lbList) {
         get(ref(db,`matched/clubs/${S.activeCode}/members`)).then(membSnap => {
@@ -679,8 +806,6 @@ function loadPlayerPoints() {
   });
 }
 
-// ─── SCORE CALC ───
-// Sums cumulative playerPoints for a squad — simple and clean
 function calcScore(ids) {
   return ids.reduce((tot, pid) => tot + (S.playerPoints[pid] || 0), 0);
 }
@@ -778,7 +903,6 @@ function showSquad() {
   }).join('');
 }
 
-// ─── TABS ───
 window.switchTab = function(tab) {
   ['squad','lb'].forEach(t => {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
@@ -786,7 +910,6 @@ window.switchTab = function(tab) {
   });
 };
 
-// ─── SHARE ───
 window.shareLeaderboard = function() {
   const club = getActiveClub();
   const rows = document.querySelectorAll('#lbList .lb-row');
@@ -806,12 +929,10 @@ window.closeModal = function(id) {
   if (id==='modal-pin') { S.pin=''; updateDots(); }
 };
 
-// ─── LOGO TAP ───
 window.logoTap = function() {
   S.logoTaps++;
   if (S.logoTaps >= 5) {
     S.logoTaps=0; S.pin=''; updateDots();
-    // Reset admin panel state
     document.getElementById('admTeam').value = '';
     document.getElementById('admList').innerHTML = '';
     document.getElementById('admTeamWonRow').style.display = 'none';
@@ -820,7 +941,6 @@ window.logoTap = function() {
   }
 };
 
-// ─── PIN ───
 window.pp = function(v) {
   if (v==='back') S.pin = S.pin.slice(0,-1);
   else if (v==='clear') S.pin = '';
@@ -847,24 +967,19 @@ function checkPin() {
   });
 }
 
-// ─── ADMIN: RENDER ───
-// Shows players for selected team, all fields blank (ready for this match's stats)
 window.renderAdmin = function() {
   const team = document.getElementById('admTeam').value;
   const wonRow = document.getElementById('admTeamWonRow');
   const saveBtnRow = document.getElementById('admSaveBtnRow');
-
   if (!team) {
     document.getElementById('admList').innerHTML = '';
     wonRow.style.display = 'none';
     saveBtnRow.style.display = 'none';
     return;
   }
-
   document.getElementById('admWonToggle').classList.remove('on');
   wonRow.style.display = 'block';
   saveBtnRow.style.display = 'block';
-
   const list = PLAYERS.filter(p => p.team === team);
   document.getElementById('admList').innerHTML = list.map(p => `
     <div class="adm-pl">
@@ -878,53 +993,34 @@ window.renderAdmin = function() {
     </div>`).join('');
 };
 
-// ─── ADMIN: ADD MATCH POINTS ───
-// Calculates points for THIS match only and ADDS to existing cumulative playerPoints
 window.addMatchPoints = function() {
   const team = document.getElementById('admTeam').value;
   if (!team) { toast('Please select a team'); return; }
-
   const teamWon = document.getElementById('admWonToggle').classList.contains('on');
   const list = PLAYERS.filter(p => p.team === team);
   const {db,ref,get,update} = window._db;
-
   get(ref(db,'matched/playerPoints')).then(snap => {
     const current = snap.exists() ? snap.val() : {};
     const updates = {};
-
     list.forEach(p => {
-      const runs        = parseInt(document.getElementById('ar_'+p.id)?.value)  || 0;
-      const teamRuns    = parseInt(document.getElementById('atr_'+p.id)?.value) || 0;
-      const wickets     = parseInt(document.getElementById('aw_'+p.id)?.value)  || 0;
-      const totalWkts   = parseInt(document.getElementById('atw_'+p.id)?.value) || 0;
-
-      const didBat  = runs > 0 && teamRuns > 0;
-      const didBowl = wickets > 0 && totalWkts > 0;
-
-      // Skip players who neither batted, bowled, nor are on winning team
+      const runs      = parseInt(document.getElementById('ar_'+p.id)?.value)  || 0;
+      const teamRuns  = parseInt(document.getElementById('atr_'+p.id)?.value) || 0;
+      const wickets   = parseInt(document.getElementById('aw_'+p.id)?.value)  || 0;
+      const totalWkts = parseInt(document.getElementById('atw_'+p.id)?.value) || 0;
+      const didBat    = runs > 0 && teamRuns > 0;
+      const didBowl   = wickets > 0 && totalWkts > 0;
       if (!didBat && !didBowl && !teamWon) return;
-
       const bat      = didBat  ? (runs / teamRuns) * 100 : 0;
       const bowl     = didBowl ? (wickets / totalWkts) * 100 : 0;
       const winBonus = teamWon ? 20 : 0;
       const matchPts = Math.max(0, bat) + Math.max(0, bowl) + winBonus;
-
       updates[`matched/playerPoints/${p.id}`] = (current[p.id] || 0) + matchPts;
     });
-
-    if (Object.keys(updates).length === 0) {
-      toast('No stats entered. Nothing to add.');
-      return;
-    }
-
-    update(ref(db,'/'), updates).then(() => {
-      toast('Match points added!');
-      closeModal('modal-admin');
-    });
+    if (Object.keys(updates).length === 0) { toast('No stats entered. Nothing to add.'); return; }
+    update(ref(db,'/'), updates).then(() => { toast('Match points added!'); closeModal('modal-admin'); });
   });
 };
 
-// ─── RESET ALL POINTS ───
 window.confirmReset = function() {
   if (confirm('Reset ALL cumulative points to zero? This cannot be undone.')) {
     const {db,ref,remove} = window._db;
@@ -936,7 +1032,6 @@ window.confirmReset = function() {
   }
 };
 
-// ─── TOAST ───
 function toast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
