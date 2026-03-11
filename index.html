@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Matched</title>
-<meta name="description" content="Matched — Family. Friends. Cricket. Play IPL 2026 with your people. No money. No registration.">
+<title>Kicket</title>
+<meta name="description" content="Kicket — Family. Friends. Cricket. Play IPL 2026 with your people. No money. No registration.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://playmatched.github.io/">
-<meta property="og:title" content="Matched — Family. Friends. Cricket.">
+<meta property="og:url" content="https://playkicket.github.io/">
+<meta property="og:title" content="Kicket — Family. Friends. Cricket.">
 <meta property="og:description" content="Play IPL 2026 with your people. No money. No registration.">
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -150,7 +150,7 @@ select option { background:#3d7a1e; color:white; }
 <!-- NAV -->
 <nav class="nav" id="mainNav" style="display:none">
   <div class="logo" onclick="logoTap()">
-    <span class="logo-text">Matched</span>
+    <span class="logo-text">Kicket</span>
     <span class="logo-sub">Family. Friends. Cricket.</span>
   </div>
   <button onclick="goHome()" style="background:var(--w10);border:1px solid var(--w20);color:white;padding:8px 14px;border-radius:20px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">← All Clubhouses</button>
@@ -159,7 +159,7 @@ select option { background:#3d7a1e; color:white; }
 <!-- MY CLUBHOUSES -->
 <div class="screen" id="screen-home">
   <div class="hero" style="padding-bottom:24px">
-    <h1>Matched</h1>
+    <h1>Kicket</h1>
     <p>Family. Friends. Cricket.</p>
   </div>
   <div style="padding:0 16px 12px">
@@ -241,7 +241,7 @@ select option { background:#3d7a1e; color:white; }
   </div>
   <div class="card">
     <label class="lbl">Clubhouse Code</label>
-    <input type="text" id="joinCode" placeholder="e.g. MatchedAB12CD34" maxlength="15" style="letter-spacing:2px">
+    <input type="text" id="joinCode" placeholder="e.g. KicketAB12CD34" maxlength="15" style="letter-spacing:2px">
     <button class="btn btn-primary" onclick="joinClubhouse()">Find Clubhouse →</button>
   </div>
 </div>
@@ -254,7 +254,7 @@ select option { background:#3d7a1e; color:white; }
   </div>
   <div class="card">
     <label class="lbl">Recovery Code</label>
-    <input type="text" id="recoverCodeInput" placeholder="Matched-XXXX-XXXX" maxlength="20" style="letter-spacing:2px">
+    <input type="text" id="recoverCodeInput" placeholder="Kicket-XXXX-XXXX" maxlength="20" style="letter-spacing:2px">
     <button class="btn btn-primary" onclick="recoverAccount()">Restore my Account →</button>
     <button class="btn-ghost" style="margin-top:8px" onclick="go('screen-home')">Back</button>
   </div>
@@ -317,7 +317,7 @@ select option { background:#3d7a1e; color:white; }
     <div id="lbList"></div>
   </div>
 
-  <div class="footer">playmatched.github.io</div>
+  <div class="footer">playkicket.github.io</div>
 </div>
 
 <!-- MODAL: POINTS RULES -->
@@ -325,7 +325,7 @@ select option { background:#3d7a1e; color:white; }
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-rules')">✕</button>
     <div class="modal-title">How Points Work</div>
-    <div class="modal-sub">IPL 2026 · Matched scoring</div>
+    <div class="modal-sub">IPL 2026 · Kicket scoring</div>
     <div class="rule-row"><div class="rule-icon">🏏</div><div><div class="rule-title">Batting Impact</div><div class="rule-desc">(Player Runs ÷ Team Total Runs) × 100<br>60 in 120 scores more than 60 in 220.</div></div></div>
     <div class="rule-row"><div class="rule-icon">🎯</div><div><div class="rule-title">Bowling Impact</div><div class="rule-desc">(Player Wickets ÷ Total Wickets Fell) × 100<br>Every wicket counts more when fewer fall.</div></div></div>
     <div class="rule-row"><div class="rule-icon">🏆</div><div><div class="rule-title">Win Bonus</div><div class="rule-desc">+20 points if your player's team won.</div></div></div>
@@ -526,15 +526,15 @@ const S = {
   playerPoints: {},
   logoTaps: 0,
   pin: '',
-  recoveryCode: null   // Matched-XXXX-XXXX
+  recoveryCode: null   // Kicket-XXXX-XXXX
 };
 
 // ─── RECOVERY CODE GENERATION ───
-// Format: Matched-XXXX-XXXX (uppercase letters + numbers, no ambiguous chars)
+// Format: Kicket-XXXX-XXXX (uppercase letters + numbers, no ambiguous chars)
 function genRecoveryCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   const seg = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-  return `Matched-${seg()}-${seg()}`;
+  return `Kicket-${seg()}-${seg()}`;
 }
 
 function saveClubs() { localStorage.setItem('m_clubs', JSON.stringify(S.clubs)); }
@@ -600,7 +600,7 @@ function genCode() {
   const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let r = '';
   for(let i=0;i<8;i++) r += c[Math.floor(Math.random()*c.length)];
-  return 'Matched' + r;
+  return 'Kicket' + r;
 }
 
 // ─── CREATE / JOIN ───
@@ -610,8 +610,8 @@ window.createClubhouse = function() {
   if (!S.name) { go('screen-name'); localStorage.setItem('m_pending_create_name', name); return; }
   const code = genCode();
   const {db,ref,set} = window._db;
-  set(ref(db, `matched/clubs/${code}`), {name, by: S.uid, at: Date.now()});
-  set(ref(db, `matched/clubs/${code}/members/${S.uid}`), {name: S.name, at: Date.now(), squad: []});
+  set(ref(db, `kicket/clubs/${code}`), {name, by: S.uid, at: Date.now()});
+  set(ref(db, `kicket/clubs/${code}/members/${S.uid}`), {name: S.name, at: Date.now(), squad: []});
   S.clubs.push({code, name, squad:[], locked:false});
   saveClubs();
   document.getElementById('displayCode').textContent = code;
@@ -621,8 +621,8 @@ window.createClubhouse = function() {
 
 window.shareInvite = function() {
   const club = getActiveClub();
-  const txt = `Join my IPL 2026 Clubhouse on Matched!\n\nClubhouse: ${club.name}\nCode: ${club.code}\n\nhttps://playmatched.github.io\n\nNo money. No registration. Just cricket.`;
-  if (navigator.share) navigator.share({title:'Matched — Join my Clubhouse', text:txt});
+  const txt = `Join my IPL 2026 Clubhouse on Kicket!\n\nClubhouse: ${club.name}\nCode: ${club.code}\n\nhttps://playkicket.github.io\n\nNo money. No registration. Just cricket.`;
+  if (navigator.share) navigator.share({title:'Kicket — Join my Clubhouse', text:txt});
   else navigator.clipboard.writeText(txt).then(() => toast('Invite copied!'));
 };
 
@@ -631,7 +631,7 @@ window.joinClubhouse = function() {
   if (!code) { toast('Please enter a code'); return; }
   if (S.clubs.find(c => c.code === code)) { toast('You already belong to this clubhouse!'); return; }
   const {db,ref,get} = window._db;
-  get(ref(db, `matched/clubs/${code}`)).then(snap => {
+  get(ref(db, `kicket/clubs/${code}`)).then(snap => {
     if (snap.exists()) {
       const name = snap.val().name;
       S.clubs.push({code, name, squad:[], locked:false});
@@ -639,13 +639,13 @@ window.joinClubhouse = function() {
       S.activeCode = code;
       if (!S.name) { localStorage.setItem('m_pending_join', code); go('screen-name'); return; }
       const {db,ref,set} = window._db;
-      set(ref(db, `matched/clubs/${code}/members/${S.uid}`), {name: S.name, at: Date.now(), squad: []});
+      set(ref(db, `kicket/clubs/${code}/members/${S.uid}`), {name: S.name, at: Date.now(), squad: []});
       if (!S.recoveryCode) {
         const rc = genRecoveryCode();
         S.recoveryCode = rc;
         localStorage.setItem('m_recovery', rc);
         const {db:db2,ref:ref2,set:set2} = window._db;
-        set2(ref2(db2, `matched/users/${rc}`), { uid: S.uid, name: S.name, at: Date.now() });
+        set2(ref2(db2, `kicket/users/${rc}`), { uid: S.uid, name: S.name, at: Date.now() });
         showRecoveryCode(() => { renderHome(); go('screen-home'); toast(`Joined ${name}!`); });
       } else {
         renderHome();
@@ -670,7 +670,7 @@ window.saveName = function() {
     localStorage.setItem('m_recovery', rc);
     // Save to Firebase so it can be looked up during recovery
     const {db,ref,set} = window._db;
-    set(ref(db, `matched/users/${rc}`), { uid: S.uid, name, at: Date.now() });
+    set(ref(db, `kicket/users/${rc}`), { uid: S.uid, name, at: Date.now() });
   }
 
   const pendingCreate = localStorage.getItem('m_pending_create_name');
@@ -686,7 +686,7 @@ window.saveName = function() {
     const club = S.clubs.find(c => c.code === pendingJoin);
     if (club) {
       const {db,ref,set} = window._db;
-      set(ref(db, `matched/clubs/${pendingJoin}/members/${S.uid}`), {name, at: Date.now(), squad: []});
+      set(ref(db, `kicket/clubs/${pendingJoin}/members/${S.uid}`), {name, at: Date.now(), squad: []});
       S.activeCode = pendingJoin;
       showRecoveryCode(() => openDash());
       return;
@@ -695,7 +695,7 @@ window.saveName = function() {
   const club = getActiveClub();
   if (club) {
     const {db,ref,set} = window._db;
-    set(ref(db, `matched/clubs/${club.code}/members/${S.uid}`), {name, at: Date.now(), squad: club.squad});
+    set(ref(db, `kicket/clubs/${club.code}/members/${S.uid}`), {name, at: Date.now(), squad: club.squad});
     showRecoveryCode(() => openDash());
   } else {
     showRecoveryCode(() => { renderHome(); go('screen-home'); });
@@ -726,7 +726,7 @@ window.recoverAccount = function() {
   if (!code) { toast('Please enter your recovery code'); return; }
 
   const {db,ref,get} = window._db;
-  get(ref(db, `matched/users/${code}`)).then(snap => {
+  get(ref(db, `kicket/users/${code}`)).then(snap => {
     if (!snap.exists()) {
       toast('Code not found. Please check and try again.');
       return;
@@ -741,7 +741,7 @@ window.recoverAccount = function() {
     localStorage.setItem('m_recovery', code);
 
     // Restore clubs from Firebase — find all clubhouses this uid is a member of
-    get(ref(db, 'matched/clubs')).then(clubsSnap => {
+    get(ref(db, 'kicket/clubs')).then(clubsSnap => {
       if (!clubsSnap.exists()) { finishRecover(); return; }
       const allClubs = clubsSnap.val();
       const restored = [];
@@ -785,7 +785,7 @@ window.openDash = openDash;
 // ─── LOAD PLAYER POINTS (live) ───
 function loadPlayerPoints() {
   const {db,ref,onValue,get} = window._db;
-  onValue(ref(db,'matched/playerPoints'), snap => {
+  onValue(ref(db,'kicket/playerPoints'), snap => {
     S.playerPoints = snap.exists() ? snap.val() : {};
     const club = getActiveClub();
     if (club) {
@@ -793,7 +793,7 @@ function loadPlayerPoints() {
       if (club.locked) showSquad();
       const lbList = document.getElementById('lbList');
       if (lbList) {
-        get(ref(db,`matched/clubs/${S.activeCode}/members`)).then(membSnap => {
+        get(ref(db,`kicket/clubs/${S.activeCode}/members`)).then(membSnap => {
           if (!membSnap.exists()) return;
           const members = membSnap.val();
           const entries = Object.entries(members)
@@ -830,7 +830,7 @@ function loadLb() {
   const club = getActiveClub();
   if (!club) return;
   const {db,ref,onValue} = window._db;
-  onValue(ref(db,`matched/clubs/${club.code}/members`), snap => {
+  onValue(ref(db,`kicket/clubs/${club.code}/members`), snap => {
     const members = snap.exists() ? snap.val() : {};
     const entries = Object.entries(members)
       .map(([uid,m]) => ({uid, name:m.name, score: m.squad ? calcScore(m.squad) : 0}))
@@ -886,7 +886,7 @@ window.lockSquad = function() {
   club.locked = true;
   saveClubs();
   const {db,ref,update} = window._db;
-  update(ref(db,`matched/clubs/${club.code}/members/${S.uid}`), {squad: club.squad});
+  update(ref(db,`kicket/clubs/${club.code}/members/${S.uid}`), {squad: club.squad});
   showSquad();
   toast('Squad locked!');
 };
@@ -922,12 +922,12 @@ window.switchTab = function(tab) {
 window.shareLeaderboard = function() {
   const club = getActiveClub();
   const rows = document.querySelectorAll('#lbList .lb-row');
-  let txt = `🏏 ${club ? club.name : 'Matched'} — IPL 2026 Standings\n\n`;
+  let txt = `🏏 ${club ? club.name : 'Kicket'} — IPL 2026 Standings\n\n`;
   rows.forEach((row,i) => {
     txt += `${i+1}. ${row.querySelector('.lb-name').textContent} — ${row.querySelector('.lb-score').textContent} pts\n`;
   });
-  txt += `\nplaymatched.github.io · Family. Friends. Cricket.`;
-  if (navigator.share) navigator.share({title:'Matched Leaderboard', text:txt});
+  txt += `\nplaykicket.github.io · Family. Friends. Cricket.`;
+  if (navigator.share) navigator.share({title:'Kicket Leaderboard', text:txt});
   else navigator.clipboard.writeText(txt).then(() => toast('Leaderboard copied!'));
 };
 
@@ -1008,7 +1008,7 @@ window.addMatchPoints = function() {
   const teamWon = document.getElementById('admWonToggle').classList.contains('on');
   const list = PLAYERS.filter(p => p.team === team);
   const {db,ref,get,update} = window._db;
-  get(ref(db,'matched/playerPoints')).then(snap => {
+  get(ref(db,'kicket/playerPoints')).then(snap => {
     const current = snap.exists() ? snap.val() : {};
     const updates = {};
     list.forEach(p => {
@@ -1023,7 +1023,7 @@ window.addMatchPoints = function() {
       const bowl     = didBowl ? (wickets / totalWkts) * 100 : 0;
       const winBonus = teamWon ? 20 : 0;
       const matchPts = Math.max(0, bat) + Math.max(0, bowl) + winBonus;
-      updates[`matched/playerPoints/${p.id}`] = (current[p.id] || 0) + matchPts;
+      updates[`kicket/playerPoints/${p.id}`] = (current[p.id] || 0) + matchPts;
     });
     if (Object.keys(updates).length === 0) { toast('No stats entered. Nothing to add.'); return; }
     update(ref(db,'/'), updates).then(() => { toast('Match points added!'); closeModal('modal-admin'); });
@@ -1033,7 +1033,7 @@ window.addMatchPoints = function() {
 window.confirmReset = function() {
   if (confirm('Reset ALL cumulative points to zero? This cannot be undone.')) {
     const {db,ref,remove} = window._db;
-    remove(ref(db,'matched/playerPoints')).then(() => {
+    remove(ref(db,'kicket/playerPoints')).then(() => {
       S.playerPoints = {};
       toast('All points reset to zero!');
       closeModal('modal-admin');
