@@ -640,9 +640,18 @@ window.joinClubhouse = function() {
       if (!S.name) { localStorage.setItem('m_pending_join', code); go('screen-name'); return; }
       const {db,ref,set} = window._db;
       set(ref(db, `matched/clubs/${code}/members/${S.uid}`), {name: S.name, at: Date.now(), squad: []});
-      renderHome();
-      go('screen-home');
-      toast(`Joined ${name}!`);
+      if (!S.recoveryCode) {
+        const rc = genRecoveryCode();
+        S.recoveryCode = rc;
+        localStorage.setItem('m_recovery', rc);
+        const {db:db2,ref:ref2,set:set2} = window._db;
+        set2(ref2(db2, `matched/users/${rc}`), { uid: S.uid, name: S.name, at: Date.now() });
+        showRecoveryCode(() => { renderHome(); go('screen-home'); toast(`Joined ${name}!`); });
+      } else {
+        renderHome();
+        go('screen-home');
+        toast(`Joined ${name}!`);
+      }
     } else { toast('Clubhouse not found. Check the code!'); }
   });
 };
