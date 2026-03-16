@@ -1209,8 +1209,8 @@ window.confirmEdit = function(newPid) {
   const idx = club.squad.indexOf(outPid);
   if (idx < 0) return;
   club.squad[idx] = newPid;
-  // In edit mode, rebuild allPlayers from current squad only (pre-lock, no history needed)
-  club.allPlayers = [...club.squad];
+  // Keep outPid in allPlayers so past points are preserved
+  club.allPlayers = [...new Set([...(club.allPlayers||[]), ...club.squad, outPid])];
   saveClubs();
   const {db,ref,update} = window._db;
   update(ref(db,`kicket/clubs/${club.code}/members/${S.uid}`), {
