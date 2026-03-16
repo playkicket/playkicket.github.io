@@ -218,7 +218,7 @@ select option { background:white; color:var(--text); }
   <div id="myClubsList">
     <div style="text-align:center;padding:40px 24px;color:var(--text3);font-size:13px;line-height:1.8">No clubhouses yet.<br>Create or join one above!</div>
   </div>
-  <div class="footer">Created by Abhishek Sarkar · abhishek.stat.iitk@gmail.com</div>
+  <div class="footer">Created by Abhishek Sarkar · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="01606369687269646a2f727560752f6868756a41666c60686d2f626e6c">[email&#160;protected]</a></div>
 </div>
 
 <!-- CREATE -->
@@ -460,7 +460,7 @@ select option { background:white; color:var(--text); }
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -742,7 +742,8 @@ window.PLAYERS = PLAYERS;
 const S = {
   uid: null, name: '', clubs: [], activeCode: '',
   playerPoints: {}, logoTaps: 0, pin: '', recoveryCode: null,
-  swapPendingOut: null  // player id being swapped out
+  swapPendingOut: null,  // player id being swapped out
+  editingSquad: false    // pre-lock edit mode
 };
 
 function genRecoveryCode() {
@@ -965,6 +966,7 @@ function openDash() {
   go('screen-dashboard');
   document.getElementById('dashName').textContent = club.name;
   document.getElementById('dashSub').textContent = `${S.name} · ${club.code}`;
+  S.editingSquad = false;
   switchTab('squad');
   renderSquadPanel();
   loadLb();
@@ -981,25 +983,45 @@ function renderSquadPanel() {
   const hasSavedSquad = club.squad && club.squad.length === 11;
 
   if (!locked) {
-    // PRE-LOCK — show selector freely
-    document.getElementById('selectorPanel').style.display = 'block';
-    document.getElementById('squadPanel').style.display = 'none';
-    document.getElementById('selCount').textContent = club.squad.length;
-    const saveBtn = document.getElementById('saveBtn');
-    saveBtn.textContent = 'Save My Squad';
-    saveBtn.disabled = club.squad.length !== 11;
-    // reload current team if selected
-    if (document.getElementById('teamDrop').value) window.loadTeam();
+    // PRE-LOCK
+    if (hasSavedSquad && !S.editingSquad) {
+      // Show saved squad with Edit button
+      document.getElementById('selectorPanel').style.display = 'none';
+      document.getElementById('swapSelectorWrap').style.display = 'none';
+      S.swapPendingOut = null;
+      // Show an "edit" banner instead of swap banner
+      document.getElementById('swapBanner').innerHTML = `<div class="swap-banner open" style="background:var(--accent-light);border-color:rgba(45,106,45,0.2)">
+        <div><div class="swap-banner-text" style="color:var(--accent)">Squad saved ✓</div><div class="swap-banner-sub">Squads lock on March 28 at noon. You can still edit.</div></div>
+        <button class="btn btn-secondary" style="width:auto;padding:8px 14px;font-size:12px;white-space:nowrap" onclick="editSquad()">Edit Squad</button>
+      </div>`;
+      document.getElementById('squadPanel').style.display = 'block';
+      showSquad(false); // false = not swappable
+    } else {
+      // Show selector
+      document.getElementById('selectorPanel').style.display = 'block';
+      document.getElementById('squadPanel').style.display = 'none';
+      document.getElementById('selCount').textContent = club.squad.length;
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.textContent = 'Save My Squad';
+      saveBtn.disabled = club.squad.length !== 11;
+      if (document.getElementById('teamDrop').value) window.loadTeam();
+    }
   } else {
-    // POST-LOCK — show squad grid
+    // POST-LOCK — show squad grid with swap UI
     document.getElementById('selectorPanel').style.display = 'none';
-    document.getElementById('squadPanel').style.display = 'block';
     S.swapPendingOut = null;
+    S.editingSquad = false;
     document.getElementById('swapSelectorWrap').style.display = 'none';
     renderSwapBanner(club, swapOpen, swapsLeft);
+    document.getElementById('squadPanel').style.display = 'block';
     showSquad();
   }
 }
+
+window.editSquad = function() {
+  S.editingSquad = true;
+  renderSquadPanel();
+};
 
 function renderSwapBanner(club, swapOpen, swapsLeft) {
   const banner = document.getElementById('swapBanner');
@@ -1125,16 +1147,19 @@ window.saveSquad = function() {
   saveClubs();
   const {db,ref,update} = window._db;
   update(ref(db,`kicket/clubs/${club.code}/members/${S.uid}`), {squad: club.squad, allPlayers: club.allPlayers, swapsUsed: club.swapsUsed || 0});
+  S.editingSquad = false;
+  renderSquadPanel();
   toast('Squad saved! ✓ You can still change it before March 28.');
 };
 
 // ─── SHOW SQUAD GRID ───
-function showSquad() {
+function showSquad(allowSwap = true) {
   const club = getActiveClub();
-  if (!club || document.getElementById('squadPanel').style.display === 'none') return;
+  if (!club) return;
+  if (document.getElementById('squadPanel').style.display === 'none') return;
   const swapOpen = isSwapOpen();
   const swapsLeft = getSwapsLeft(club);
-  const canSwap = swapOpen && swapsLeft > 0 && !S.swapPendingOut;
+  const canSwap = allowSwap && swapOpen && swapsLeft > 0 && !S.swapPendingOut;
   document.getElementById('sqGrid').innerHTML = club.squad.map(pid => {
     const p = PLAYERS.find(x => x.id===pid);
     const pts = (S.playerPoints[pid] || 0).toFixed(1);
@@ -1331,6 +1356,7 @@ window.confirmReset = function() {
     });
   }
 };
+
 
 function toast(msg) {
   const t = document.getElementById('toast');
