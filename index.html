@@ -755,7 +755,16 @@ function genRecoveryCode() {
 function saveClubs() { localStorage.setItem('m_clubs', JSON.stringify(S.clubs)); }
 function loadClubsFromStorage() {
   const raw = localStorage.getItem('m_clubs');
-  if (raw) { S.clubs = JSON.parse(raw); return; }
+  if (raw) {
+    S.clubs = JSON.parse(raw);
+    // Migrate old club objects that don't have allPlayers or baselines
+    S.clubs.forEach(c => {
+      if (!c.allPlayers || c.allPlayers.length === 0) c.allPlayers = [...(c.squad || [])];
+      if (!c.baselines) c.baselines = {};
+      if (!c.swapsUsed) c.swapsUsed = 0;
+    });
+    return;
+  }
   S.clubs = [];
 }
 function getActiveClub() { return S.clubs.find(c => c.code === S.activeCode) || null; }
@@ -954,7 +963,7 @@ window.recoverAccount = function() {
           restored.push({
             code, name: club.name,
             squad: member.squad || [],
-            allPlayers: member.allPlayers || member.squad || [],
+            allPlayers: member.allPlayers && member.allPlayers.length > 0 ? member.allPlayers : (member.squad || []),
             swapsUsed: member.swapsUsed || 0,
             baselines: member.baselines || {}
           });
