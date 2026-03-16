@@ -1093,6 +1093,10 @@ function loadPlayerPoints() {
           const members = membSnap.val();
           const entries = Object.entries(members)
             .map(([uid,m]) => ({uid, name:m.name, score: calcScore(m)}))
+            .sort((a,b) => b.score - a.score);
+          const myIdx = entries.findIndex(e => e.uid === S.uid);
+          document.getElementById('myRank').textContent = myIdx >= 0 ? '#'+(myIdx+1) : '#—';
+          document.getElementById('topScore').textContent = entries[0] ? entries[0].score.toFixed(1) : '0';
           lbList.innerHTML = entries.map((e,i) => `
             <div class="lb-row ${e.uid===S.uid?'you':''}">
               <div class="lb-rank">${i===0?'🏆':i===1?'🥈':i===2?'🥉':i+1}</div>
@@ -1121,6 +1125,11 @@ function loadLb() {
     const members = snap.exists() ? snap.val() : {};
     const entries = Object.entries(members)
       .map(([uid,m]) => ({uid, name:m.name, score: calcScore(m)}))
+      .sort((a,b) => b.score - a.score);
+    const myIdx = entries.findIndex(e => e.uid === S.uid);
+    document.getElementById('myRank').textContent = myIdx >= 0 ? '#'+(myIdx+1) : '#—';
+    document.getElementById('topScore').textContent = entries[0] ? entries[0].score.toFixed(1) : '0';
+    updateScore();
     document.getElementById('lbList').innerHTML = entries.map((e,i) => `
       <div class="lb-row ${e.uid===S.uid?'you':''}">
         <div class="lb-rank">${i===0?'🏆':i===1?'🥈':i===2?'🥉':i+1}</div>
