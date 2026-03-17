@@ -1350,8 +1350,10 @@ window.shareLeaderboard = function() {
   const rows = document.querySelectorAll('#lbList .lb-row');
   let txt = `🏏 ${club ? club.name : 'Kicket'} — IPL 2026 Standings\n\n`;
   rows.forEach((row) => {
-    const rank = row.querySelector('.lb-rank').textContent;
-    txt += `${rank}. ${row.querySelector('.lb-name').textContent} — ${row.querySelector('.lb-score').textContent} pts\n`;
+    const rankEl = row.querySelector('.lb-rank').textContent.trim();
+    const rankNum = rankEl.match(/\d+/)?.[0] || '1';
+    const isTop = rankEl.includes('🏆');
+    txt += `${rankNum}. ${row.querySelector('.lb-name').textContent} — ${row.querySelector('.lb-score').textContent} pts${isTop ? ' 🏆' : ''}\n`;
   });
   txt += `\nplaykicket.github.io · Family. Friends. Cricket.`;
   if (navigator.share) navigator.share({title:'Kicket Leaderboard', text:txt});
