@@ -1349,8 +1349,9 @@ window.shareLeaderboard = function() {
   const club = getActiveClub();
   const rows = document.querySelectorAll('#lbList .lb-row');
   let txt = `🏏 ${club ? club.name : 'Kicket'} — IPL 2026 Standings\n\n`;
-  rows.forEach((row,i) => {
-    txt += `${i+1}. ${row.querySelector('.lb-name').textContent} — ${row.querySelector('.lb-score').textContent} pts\n`;
+  rows.forEach((row) => {
+    const rank = row.querySelector('.lb-rank').textContent;
+    txt += `${rank}. ${row.querySelector('.lb-name').textContent} — ${row.querySelector('.lb-score').textContent} pts\n`;
   });
   txt += `\nplaykicket.github.io · Family. Friends. Cricket.`;
   if (navigator.share) navigator.share({title:'Kicket Leaderboard', text:txt});
