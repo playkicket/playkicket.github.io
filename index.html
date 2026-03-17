@@ -196,11 +196,24 @@ select option { background:white; color:var(--text); }
 .share-btn:hover { background:var(--bg2); }
 </style>
 <script>
-  const version = "v3";
-  if (localStorage.getItem("site_version") !== version) {
-    localStorage.setItem("site_version", version);
-    location.reload(true);
+  const version = "v4"; // update on deploy
+
+  function checkVersion() {
+    const storedVersion = localStorage.getItem("site_version");
+
+    if (storedVersion && storedVersion !== version) {
+      localStorage.setItem("site_version", version);
+      location.reload();
+    } else {
+      localStorage.setItem("site_version", version);
+    }
   }
+
+  // Run once on load
+  checkVersion();
+
+  // Then check every 30 seconds
+  setInterval(checkVersion, 30000);
 </script>
 </head>
 <body>
