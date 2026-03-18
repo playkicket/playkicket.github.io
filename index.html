@@ -458,6 +458,38 @@ select option { background:white; color:var(--text); }
   </div>
 </div>
 
+<!-- MODAL: WELCOME — shows once on first visit only -->
+<div class="modal-ov" id="modal-welcome">
+  <div class="modal">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:40px;margin-bottom:10px">🏏</div>
+      <div class="modal-title" style="text-align:center">How to Play</div>
+      <div class="modal-sub" style="text-align:center">Your private IPL 2026 fantasy league</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-icon">🏠</div>
+      <div><div class="rule-title">Create or Join a Clubhouse</div>
+      <div class="rule-desc">Start a private space for your group or join one with a code. No strangers, just your people.</div></div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-icon">🏏</div>
+      <div><div class="rule-title">Pick Your 11</div>
+      <div class="rule-desc">Choose 11 players from any IPL team before March 28. One squad for the whole season.</div></div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-icon">📊</div>
+      <div><div class="rule-title">Earn Points Every Match</div>
+      <div class="rule-desc">Your players score based on real match performance — batting impact, bowling impact and a win bonus.</div></div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-icon">🏆</div>
+      <div><div class="rule-title">Climb the Leaderboard</div>
+      <div class="rule-desc">Live standings show who's winning in your Clubhouse. Bragging rights only — no money involved!</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="closeWelcome()">Let's Play →</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
@@ -742,8 +774,8 @@ window.PLAYERS = PLAYERS;
 const S = {
   uid: null, name: '', clubs: [], activeCode: '',
   playerPoints: {}, logoTaps: 0, pin: '', recoveryCode: null,
-  swapPendingOut: null,  // player id being swapped out
-  editingSquad: false    // pre-lock edit mode
+  swapPendingOut: null,
+  editingSquad: false
 };
 
 function genRecoveryCode() {
@@ -769,10 +801,6 @@ function getActiveClub() { return S.clubs.find(c => c.code === S.activeCode) || 
 function getSwapsUsed(club) { return club.swapsUsed || 0; }
 function getSwapsLeft(club) { return MAX_SWAPS - getSwapsUsed(club); }
 
-// ─── SCORE ───
-// allPlayers = all players ever in squad (current + swapped out) → past points preserved
-// baselines  = points a player had when they joined → subtracted so they start from 0
-// calcScore works with BOTH local club objects AND raw Firebase member objects
 function calcScore(member) {
   const allIds = (member.allPlayers && member.allPlayers.length > 0)
     ? member.allPlayers
@@ -784,7 +812,6 @@ function calcScore(member) {
   }, 0);
 }
 
-// Per-player score shown on squad card (baseline-adjusted)
 function playerScore(pid, club) {
   const baselines = club.baselines || {};
   return Math.max(0, (S.playerPoints[pid] || 0) - (baselines[pid] || 0));
@@ -801,6 +828,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadPlayerPoints();
   renderHome();
   go('screen-home');
+  showWelcomeIfNew();
 });
 
 // ─── NAVIGATION ───
@@ -812,6 +840,17 @@ function go(id) {
 }
 window.go = go;
 window.goHome = function() { renderHome(); go('screen-home'); };
+
+// ─── WELCOME MODAL ───
+function showWelcomeIfNew() {
+  if (!localStorage.getItem('kw')) {
+    openModal('modal-welcome');
+  }
+}
+window.closeWelcome = function() {
+  localStorage.setItem('kw', '1');
+  closeModal('modal-welcome');
+};
 
 // ─── HOME ───
 function renderHome() {
@@ -1009,7 +1048,6 @@ function openDash() {
 }
 window.openDash = openDash;
 
-// ─── RENDER SQUAD PANEL (time-aware) ───
 function renderSquadPanel() {
   const club = getActiveClub();
   if (!club) return;
@@ -1019,21 +1057,17 @@ function renderSquadPanel() {
   const hasSavedSquad = club.squad && club.squad.length === 11;
 
   if (!locked) {
-    // PRE-LOCK
     if (hasSavedSquad && !S.editingSquad) {
-      // Show saved squad with Edit button
       document.getElementById('selectorPanel').style.display = 'none';
       document.getElementById('swapSelectorWrap').style.display = 'none';
       S.swapPendingOut = null;
-      // Show an "edit" banner instead of swap banner
       document.getElementById('swapBanner').innerHTML = `<div class="swap-banner open" style="background:var(--accent-light);border-color:rgba(45,106,45,0.2)">
         <div><div class="swap-banner-text" style="color:var(--accent)">Squad saved ✓</div><div class="swap-banner-sub">Squads lock on March 28 at noon. You can still edit.</div></div>
         <button class="btn btn-secondary" style="width:auto;padding:8px 14px;font-size:12px;white-space:nowrap" onclick="editSquad()">Edit Squad</button>
       </div>`;
       document.getElementById('squadPanel').style.display = 'block';
-      showSquad(false); // false = not swappable
+      showSquad(false);
     } else {
-      // Show selector
       document.getElementById('selectorPanel').style.display = 'block';
       document.getElementById('squadPanel').style.display = 'none';
       document.getElementById('selCount').textContent = club.squad.length;
@@ -1043,7 +1077,6 @@ function renderSquadPanel() {
       if (document.getElementById('teamDrop').value) window.loadTeam();
     }
   } else {
-    // POST-LOCK — show squad grid with swap UI
     document.getElementById('selectorPanel').style.display = 'none';
     S.swapPendingOut = null;
     S.editingSquad = false;
@@ -1057,7 +1090,6 @@ function renderSquadPanel() {
 window.editSquad = function() {
   S.editingSquad = true;
   S.swapPendingOut = null;
-  // Show squad grid with tappable cards — same UI as swap but no counter
   document.getElementById('selectorPanel').style.display = 'none';
   document.getElementById('swapSelectorWrap').style.display = 'none';
   document.getElementById('swapBanner').innerHTML = `<div class="swap-banner open" style="background:var(--accent-light);border-color:rgba(45,106,45,0.2)">
@@ -1065,14 +1097,13 @@ window.editSquad = function() {
     <button class="btn btn-secondary" style="width:auto;padding:8px 14px;font-size:12px;white-space:nowrap" onclick="cancelEdit()">Done</button>
   </div>`;
   document.getElementById('squadPanel').style.display = 'block';
-  showSquad(false, true); // allowSwap=false, editMode=true
+  showSquad(false, true);
 };
 
 function renderSwapBanner(club, swapOpen, swapsLeft) {
   const banner = document.getElementById('swapBanner');
   const dots = Array.from({length: MAX_SWAPS}, (_,i) =>
     `<div class="swap-dot ${i >= swapsLeft ? 'used' : ''}"></div>`).join('');
-
   if (!swapOpen) {
     banner.innerHTML = `<div class="swap-banner locked">
       <div><div class="swap-banner-text">🔒 Squad Locked</div><div class="swap-banner-sub">Squads locked from March 28 for IPL 2026</div></div>
@@ -1091,12 +1122,10 @@ function renderSwapBanner(club, swapOpen, swapsLeft) {
   }
 }
 
-// Returns standard competition rank (1,1,3 not 1,2,3 for tied scores)
 function getRank(entries, idx) {
   return entries.filter(e => e.score > entries[idx].score).length + 1;
 }
 
-// ─── PLAYER POINTS ───
 function loadPlayerPoints() {
   const {db,ref,onValue,get} = window._db;
   onValue(ref(db,'kicket/playerPoints'), snap => {
@@ -1138,7 +1167,6 @@ function updateScore() {
   document.getElementById('myScore').textContent = calcScore(club).toFixed(1);
 }
 
-// ─── LEADERBOARD ───
 function loadLb() {
   const club = getActiveClub();
   if (!club) return;
@@ -1164,7 +1192,6 @@ function loadLb() {
   });
 }
 
-// ─── PRE-LOCK PLAYER SELECTION ───
 window.loadTeam = function() {
   const club = getActiveClub();
   if (!club) return;
@@ -1195,7 +1222,6 @@ window.togglePl = function(pid) {
   saveClubs(); window.loadTeam();
 };
 
-// ─── SAVE SQUAD (pre-lock, can re-save freely) ───
 window.saveSquad = function() {
   const club = getActiveClub();
   if (!club || club.squad.length !== 11) { toast('Pick exactly 11 players first'); return; }
@@ -1208,7 +1234,6 @@ window.saveSquad = function() {
   toast('Squad saved! ✓ You can still change it before March 28.');
 };
 
-// ─── SHOW SQUAD GRID ───
 function showSquad(allowSwap = true, editMode = false) {
   const club = getActiveClub();
   if (!club) return;
@@ -1217,7 +1242,6 @@ function showSquad(allowSwap = true, editMode = false) {
   const swapsLeft = getSwapsLeft(club);
   const canSwap = allowSwap && swapOpen && swapsLeft > 0 && !S.swapPendingOut;
   const canEdit = editMode && !S.swapPendingOut;
-  const baselines = club.baselines || {};
   document.getElementById('sqGrid').innerHTML = club.squad.map(pid => {
     const p = PLAYERS.find(x => x.id===pid);
     const pts = playerScore(pid, club).toFixed(1);
@@ -1235,7 +1259,6 @@ function showSquad(allowSwap = true, editMode = false) {
   }).join('');
 }
 
-// ─── EDIT FLOW (pre-lock, no swap cost) ───
 window.startEdit = function(pid) {
   S.swapPendingOut = pid;
   const p = PLAYERS.find(x => x.id===pid);
@@ -1256,9 +1279,7 @@ window.confirmEdit = function(newPid) {
   const idx = club.squad.indexOf(outPid);
   if (idx < 0) return;
   club.squad[idx] = newPid;
-  // Keep outPid in allPlayers so past points are preserved
   club.allPlayers = [...new Set([...(club.allPlayers||[]), ...club.squad, outPid])];
-  // Snapshot new player's current points as baseline — they start earning from now
   club.baselines = club.baselines || {};
   club.baselines[newPid] = S.playerPoints[newPid] || 0;
   saveClubs();
@@ -1269,9 +1290,10 @@ window.confirmEdit = function(newPid) {
   S.swapPendingOut = null;
   document.getElementById('swapSelectorWrap').style.display = 'none';
   document.getElementById('sqGrid').style.display = 'grid';
-  window.editSquad(); // stay in edit mode
+  window.editSquad();
   toast(`✓ ${outPlayer?outPlayer.name:outPid} → ${inPlayer?inPlayer.name:newPid}`);
 };
+
 window.startSwap = function(pid) {
   const club = getActiveClub();
   if (!club || !isSwapOpen() || getSwapsLeft(club) <= 0) return;
@@ -1305,20 +1327,13 @@ window.confirmSwap = function(newPid) {
   const outPid = S.swapPendingOut;
   const outPlayer = PLAYERS.find(x => x.id===outPid);
   const inPlayer  = PLAYERS.find(x => x.id===newPid);
-
-  // Replace in squad
   const idx = club.squad.indexOf(outPid);
   if (idx < 0) return;
   club.squad[idx] = newPid;
-
-  // Keep outPid in allPlayers so past points count
   club.allPlayers = [...new Set([...(club.allPlayers||[]), ...club.squad, outPid])];
   club.swapsUsed = (club.swapsUsed || 0) + 1;
-
-  // Snapshot new player's current points as baseline — they start earning from now
   club.baselines = club.baselines || {};
   club.baselines[newPid] = S.playerPoints[newPid] || 0;
-
   saveClubs();
   const {db,ref,update} = window._db;
   update(ref(db,`kicket/clubs/${club.code}/members/${S.uid}`), {
@@ -1327,7 +1342,6 @@ window.confirmSwap = function(newPid) {
     swapsUsed: club.swapsUsed,
     baselines: club.baselines
   });
-
   S.swapPendingOut = null;
   document.getElementById('swapSelectorWrap').style.display = 'none';
   document.getElementById('sqGrid').style.display = 'grid';
@@ -1374,7 +1388,6 @@ window.shareLeaderboard = function() {
   else navigator.clipboard.writeText(txt).then(() => toast('Leaderboard copied!'));
 };
 
-// ─── MODALS ───
 window.openModal  = function(id) { document.getElementById(id).classList.add('active'); };
 window.closeModal = function(id) {
   document.getElementById(id).classList.remove('active');
@@ -1468,7 +1481,6 @@ window.confirmReset = function() {
     });
   }
 };
-
 
 function toast(msg) {
   const t = document.getElementById('toast');
