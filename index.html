@@ -848,7 +848,7 @@ window.goHome = function() { renderHome(); go('screen-home'); };
 // ─── WELCOME MODAL ───
 function showWelcomeIfNew() {
   if (!localStorage.getItem('kw')) {
-    openModal('modal-welcome');
+    setTimeout(() => openModal('modal-welcome'), 800);
   }
 }
 window.closeWelcome = function() {
