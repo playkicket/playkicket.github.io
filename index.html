@@ -907,7 +907,6 @@ function renderTeamGrid() {
     return `<div class="${cls}" onclick="${clickFn}">
       <div class="team-card-name">${t.id}</div>
       <div class="team-card-slots">${count}</div>
-      <div class="team-card-slots-lbl">slot${count !== 1 ? 's' : ''}</div>
       ${hint ? `<div class="team-card-swap-hint">${hint}</div>` : ''}
     </div>`;
   }).join('');
