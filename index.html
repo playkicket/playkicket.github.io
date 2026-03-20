@@ -365,12 +365,11 @@ select option { background:white; color:var(--text); }
 <div class="modal-ov" id="modal-rules">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-rules')">✕</button>
-    <div class="modal-title">How Points Work</div>
-    <div class="rule-row"><div><div class="rule-title">Your picks</div><div class="rule-desc">You have 11 picks. Spread them across teams.</div></div></div>
-    <div class="rule-row"><div><div class="rule-title">Win = points</div><div class="rule-desc">Each win earns 10 points per pick on that team.</div></div></div>
-    <div class="rule-row"><div><div class="rule-title">Winning streaks</div><div class="rule-desc">Keep winning → earn more points each time (+5 per win).</div></div></div>
-    <div class="rule-row"><div><div class="rule-title">Lose = reset</div><div class="rule-desc">Team loses → back to 10 points next win.</div></div></div>
-    <div class="rule-row"><div><div class="rule-title">No negatives</div><div class="rule-desc">No points lost. Ever.</div></div></div>
+    <div class="modal-title" style="padding-bottom: 16px;">How points work</div>
+    <div class="rule-row"><div><div class="rule-title">1. Wins = points</div><div class="rule-desc">Each win earns 10 points per pick on that team.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">2. Winning streaks</div><div class="rule-desc">Consecutive wins add +5 points each time.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">3. Lose = reset</div><div class="rule-desc">A loss resets the streak. Next win starts at 10 points.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">4. No negatives</div><div class="rule-desc">No points lost. Ever.</div></div></div>
     <button class="btn btn-primary" style="margin-top:8px" onclick="closeModal('modal-rules')">Got it!</button>
   </div>
 </div>
