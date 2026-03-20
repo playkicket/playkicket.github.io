@@ -844,7 +844,7 @@ function renderTeamSlotList() {
       const canRemove = count > 0;
       return `<div class="team-pane ${count > 0 ? 'has-slots' : ''}">
         <div class="team-pane-name">${t.name}</div>
-        <div class="team-pane-abbr">$({t.id})</div>
+        <div class="team-pane-abbr">(${t.id})</div>
         <div class="team-pane-controls">
           <button class="slot-btn" onclick="adjustSlot('${t.id}',-1)" ${canRemove?'':'disabled'}>−</button>
           <div class="slot-count">${count}</div>
