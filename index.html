@@ -324,18 +324,18 @@ select option { background:white; color:var(--text); }
     <div class="stat-card"><div class="stat-lbl">Top Score</div><div class="stat-val" id="topScore">0</div></div>
   </div>
   <div class="tabs">
-    <button class="tab-btn active" id="tab-squad" onclick="switchTab('squad')">My Slots</button>
+    <button class="tab-btn active" id="tab-squad" onclick="switchTab('squad')">My Picks</button>
     <button class="tab-btn" id="tab-lb" onclick="switchTab('lb')">Leaderboard</button>
   </div>
 
   <div id="panel-squad" style="padding:16px">
     <div id="selectorPanel">
       <div class="slot-counter">
-        <div class="slot-cnt-txt">Slots remaining to assign</div>
+        <div class="slot-cnt-txt">Picks remaining</div>
         <div class="slot-cnt-num"><span id="slotsLeft">11</span> / 11</div>
       </div>
       <div id="teamSlotList"></div>
-      <button class="btn btn-primary" style="margin-top:4px" id="saveBtn" onclick="saveAllocation()" disabled>Save My Allocation</button>
+      <button class="btn btn-primary" style="margin-top:4px" id="saveBtn" onclick="saveAllocation()" disabled>Save picks</button>
     </div>
 
     <div id="squadPanel" style="display:none">
@@ -838,7 +838,7 @@ function renderTeamSlotList() {
   const saveBtn = document.getElementById('saveBtn');
   const alreadySaved = assigned === TOTAL_SLOTS && club._saved;
   saveBtn.disabled = remaining !== 0;
-  saveBtn.textContent = alreadySaved ? 'Edit My Allocation' : 'Save My Allocation';
+  saveBtn.textContent = alreadySaved ? 'Edit picks' : 'Save picks';
 
   document.getElementById('teamSlotList').innerHTML = `<div class="team-pane-grid">` +
     TEAMS.map(t => {
