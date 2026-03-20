@@ -901,7 +901,7 @@ function renderTeamGrid() {
     if (count === 0 && !isTarget) cls += ' no-slots';
     if (canSwap && count > 0) cls += ' swappable';
     if (isTarget) cls += ' swappable';
-    const hint = canSwap && count > 0 ? 'TAP TO MOVE SLOT' : '';
+    const hint = canSwap && count > 0 ? 'TAP TO SWAP' : '';
     const clickFn = canSwap && count > 0 ? `startSwap('${t.id}')` : (isTarget ? `confirmSwap('${t.id}')` : '');
 
     return `<div class="${cls}" onclick="${clickFn}">
@@ -926,25 +926,25 @@ function renderSwapBanner(club) {
     // Used swap today
     banner.innerHTML = `<div class="swap-banner used">
       <div><div class="swap-banner-text" style="color:var(--danger)">Swap used today</div>
-      <div class="swap-banner-sub">Next swap window opens at midnight IST on the next match day</div></div>
+      <div class="swap-banner-sub">Next swap available between 12:00 AM–12:00 PM IST on the next match day.</div></div>
     </div>`;
   } else if (swapOpen) {
     // Window is open right now
     banner.innerHTML = `<div class="swap-banner open">
-      <div><div class="swap-banner-text" style="color:var(--warning)">🔄 Swap window open until noon IST</div>
-      <div class="swap-banner-sub">Tap a team card to move 1 slot elsewhere</div></div>
+      <div><div class="swap-banner-text" style="color:var(--warning)">Swap window open until 12:00 PM IST</div>
+      <div class="swap-banner-sub">Tap a team card to swap 1 pick</div></div>
     </div>`;
   } else if (isMatchday && hour >= 12) {
     // Match day but window closed (after noon)
     banner.innerHTML = `<div class="swap-banner locked">
       <div><div class="swap-banner-text" style="color:var(--text2)">Swap window closed</div>
-      <div class="swap-banner-sub">Opens at midnight IST on the next match day</div></div>
+      <div class="swap-banner-sub">Next swap available between 12:00 AM–12:00 PM IST on the next match day.</div></div>
     </div>`;
   } else {
     // Not a match day
     banner.innerHTML = `<div class="swap-banner locked">
-      <div><div class="swap-banner-text" style="color:var(--text2)">No match today</div>
-      <div class="swap-banner-sub">Swap window: 12 AM - 12 PM IST on match days</div></div>
+      <div><div class="swap-banner-text" style="color:var(--text2)">Swap window closed</div>
+      <div class="swap-banner-sub">Next swap available between 12:00 AM–12:00 PM IST on the next match day.</div></div>
     </div>`;
   }
 }
