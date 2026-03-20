@@ -102,7 +102,6 @@ select option { background:white; color:var(--text); }
 .slot-cnt-txt { font-size:13px; color:var(--accent); font-weight:500; }
 .slot-cnt-num { font-family:'Abril Fatface',cursive; font-size:20px; color:var(--accent); }
 
-/* NEW: pane grid for pre-lock allocation */
 .team-pane-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:14px; }
 .team-pane { background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r-sm); padding:12px 10px; text-align:center; transition:all 0.15s; }
 .team-pane.has-slots { border-color:var(--accent); background:var(--accent-light); }
@@ -137,7 +136,6 @@ select option { background:white; color:var(--text); }
 .swap-banner-text { font-size:13px; font-weight:600; }
 .swap-banner-sub { font-size:11px; color:var(--text2); margin-top:2px; }
 
-/* OLD team-slot-row kept only for swap target list */
 .team-slot-row { display:flex; align-items:center; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:8px; gap:12px; }
 .team-slot-row.has-slots { border-color:var(--accent); background:var(--accent-light); }
 .team-name { font-size:14px; font-weight:600; flex:1; color:var(--text); }
@@ -196,7 +194,6 @@ select option { background:white; color:var(--text); }
 .screen-pad { padding:28px 16px 0; }
 .share-btn { background:var(--bg); border:1px solid var(--border2); color:var(--text2); padding:7px 14px; border-radius:20px; font-size:12px; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:500; transition:all 0.15s; }
 .share-btn:hover { background:var(--bg2); }
-/* Welcome modal — slide up from bottom */
 #modal-welcome { align-items:flex-end; padding:0; }
 #modal-welcome .modal { border-radius:var(--r) var(--r) 0 0; transform:translateY(100%); transition:transform 1.2s cubic-bezier(0.22,1,0.36,1); }
 #modal-welcome.active .modal { transform:translateY(0); }
@@ -332,7 +329,6 @@ select option { background:white; color:var(--text); }
   </div>
 
   <div id="panel-squad" style="padding:16px">
-    <!-- PRE-LOCK: slot allocation panel -->
     <div id="selectorPanel">
       <div class="slot-counter">
         <div class="slot-cnt-txt">Slots remaining to assign</div>
@@ -342,7 +338,6 @@ select option { background:white; color:var(--text); }
       <button class="btn btn-primary" style="margin-top:4px" id="saveBtn" onclick="saveAllocation()" disabled>Save My Allocation</button>
     </div>
 
-    <!-- POST-LOCK: team cards with swap -->
     <div id="squadPanel" style="display:none">
       <div id="swapBanner"></div>
       <div id="swapTargetWrap" style="display:none">
@@ -376,7 +371,7 @@ select option { background:white; color:var(--text); }
     <div class="rule-row"><div class="rule-icon">🏆</div><div><div class="rule-title">Points per Win</div><div class="rule-desc">Each match a team wins, you earn 10 points for every slot you have on that team.</div></div></div>
     <div class="rule-row"><div class="rule-icon">🔥</div><div><div class="rule-title">Streak Bonus</div><div class="rule-desc">Same team wins back to back? Bonus kicks in!<br>Win 1 → 10 pts · Win 2 → 15 pts · Win 3 → 20 pts · Win 4 → 25 pts (keeps going +5 per win)</div></div></div>
     <div class="rule-row"><div class="rule-icon">💔</div><div><div class="rule-title">Streak Breaks</div><div class="rule-desc">Team loses → streak resets. Back to 10 pts per slot next win.</div></div></div>
-    <div class="rule-row"><div class="rule-icon">🔄</div><div><div class="rule-title">Daily Swap</div><div class="rule-desc">Once per matchday, move exactly 1 slot from one team to another. Use it wisely!</div></div></div>
+    <div class="rule-row"><div class="rule-icon">🔄</div><div><div class="rule-title">Daily Swap</div><div class="rule-desc">Once per matchday, move exactly 1 slot from one team to another. Swap window: midnight to noon IST on match days.</div></div></div>
     <div class="rule-row"><div class="rule-icon">✅</div><div><div class="rule-title">No Negative Points</div><div class="rule-desc">Team loses = 0 points. Never penalised.</div></div></div>
     <button class="btn btn-primary" style="margin-top:8px" onclick="closeModal('modal-rules')">Got it!</button>
   </div>
@@ -441,7 +436,7 @@ select option { background:white; color:var(--text); }
     <div class="rule-row">
       <div class="rule-icon">🔄</div>
       <div><div class="rule-title">One Swap Per Matchday</div>
-      <div class="rule-desc">Move 1 slot between teams once per matchday. Use it to chase streaks or cut losses.</div></div>
+      <div class="rule-desc">Move 1 slot between teams once per matchday. Swap window opens midnight to noon IST on match days.</div></div>
     </div>
     <div class="rule-row">
       <div class="rule-icon">🏆</div>
@@ -484,6 +479,55 @@ const STREAK_BONUS = 5;
 const ALLOC_LOCK_DATE = new Date('2026-03-28T06:30:00Z');
 function isLocked() { return new Date() >= ALLOC_LOCK_DATE; }
 
+// ─── MATCHDAYS & SWAP WINDOW ───
+// Add or remove dates here as the schedule is confirmed.
+// Format: 'YYYY-MM-DD' in IST (just the date, no time).
+const MATCHDAYS = [
+  '2026-03-29',
+  '2026-03-30',
+  '2026-03-31',
+  '2026-04-01',
+  '2026-04-02',
+  '2026-04-03',
+  '2026-04-04',
+  '2026-04-05',
+  '2026-04-06',
+  '2026-04-07',
+  '2026-04-08',
+  '2026-04-09',
+  '2026-04-10',
+  '2026-04-11',
+  '2026-04-12',
+];
+
+// Returns today's date string in IST as 'YYYY-MM-DD'
+function todayIST() {
+  const now = new Date();
+  // IST = UTC+5:30
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  return ist.toISOString().slice(0, 10);
+}
+
+// Returns current hour (0–23) in IST
+function hourIST() {
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  return ist.getUTCHours();
+}
+
+// Swap window: today must be a matchday AND current IST time must be 00:00–11:59
+function isSwapWindowOpen() {
+  const today = todayIST();
+  const hour = hourIST();
+  return MATCHDAYS.includes(today) && hour < 12;
+}
+
+// Has the current user already swapped today?
+// club.swappedOn stores the IST date string of last swap (e.g. '2026-03-29')
+function hasSwappedToday(club) {
+  return club.swappedOn === todayIST();
+}
+
 const TEAMS = [
   {id:'CSK', name:'Chennai Super Kings'},
   {id:'MI',  name:'Mumbai Indians'},
@@ -518,7 +562,9 @@ function loadClubsFromStorage() {
     S.clubs = JSON.parse(raw);
     S.clubs.forEach(c => {
       if (!c.slots) c.slots = {};
-      if (!c.swappedToday) c.swappedToday = false;
+      // migrate old swappedToday boolean to swappedOn date string
+      if (c.swappedToday && !c.swappedOn) c.swappedOn = todayIST();
+      delete c.swappedToday;
       if (!c.lastMatchday) c.lastMatchday = '';
     });
     return;
@@ -529,10 +575,6 @@ function getActiveClub() { return S.clubs.find(c => c.code === S.activeCode) || 
 
 function totalAssigned(slots) {
   return Object.values(slots || {}).reduce((a,b) => a+b, 0);
-}
-
-function getMemberScore(member) {
-  return member.score || 0;
 }
 
 // ─── INIT ───
@@ -628,7 +670,7 @@ window.createClubhouse = function() {
   const {db,ref,set} = window._db;
   set(ref(db, `kicket/clubs/${code}`), {name, by: S.uid, at: Date.now()});
   set(ref(db, `kicket/clubs/${code}/members/${S.uid}`), {name: S.name, at: Date.now(), slots: {}, score: 0});
-  S.clubs.push({code, name, slots:{}, swappedToday:false, lastMatchday:'', score:0});
+  S.clubs.push({code, name, slots:{}, swappedOn:'', lastMatchday:'', score:0});
   saveClubs();
   document.getElementById('displayCode').textContent = code;
   S.activeCode = code;
@@ -650,7 +692,7 @@ window.joinClubhouse = function() {
   get(ref(db, `kicket/clubs/${code}`)).then(snap => {
     if (snap.exists()) {
       const name = snap.val().name;
-      S.clubs.push({code, name, slots:{}, swappedToday:false, lastMatchday:'', score:0});
+      S.clubs.push({code, name, slots:{}, swappedOn:'', lastMatchday:'', score:0});
       saveClubs();
       S.activeCode = code;
       if (!S.name) { localStorage.setItem('m_pending_join', code); go('screen-name'); return; }
@@ -747,7 +789,7 @@ window.recoverAccount = function() {
             code, name: club.name,
             slots: member.slots || {},
             score: member.score || 0,
-            swappedToday: member.swappedToday || false,
+            swappedOn: member.swappedOn || '',
             lastMatchday: member.lastMatchday || ''
           });
         }
@@ -798,7 +840,6 @@ function renderTeamSlotList() {
   const remaining = TOTAL_SLOTS - assigned;
   document.getElementById('slotsLeft').textContent = remaining;
 
-  // Update save button: if all assigned, show "Edit My Allocation" after save; else "Save My Allocation"
   const saveBtn = document.getElementById('saveBtn');
   const alreadySaved = assigned === TOTAL_SLOTS && club._saved;
   saveBtn.disabled = remaining !== 0;
@@ -832,7 +873,6 @@ window.adjustSlot = function(teamId, delta) {
   if (delta < 0 && current <= 0) return;
   club.slots[teamId] = current + delta;
   if (club.slots[teamId] === 0) delete club.slots[teamId];
-  // editing resets saved state so button goes back to "Save My Allocation"
   club._saved = false;
   saveClubs();
   renderTeamSlotList();
@@ -849,7 +889,6 @@ window.saveAllocation = function() {
   const {db,ref,update} = window._db;
   update(ref(db,`kicket/clubs/${club.code}/members/${S.uid}`), {slots: club.slots, score: club.score || 0});
   toast('Allocation saved! ✓ You can still change it before March 28.');
-  // Re-render to flip button label
   renderTeamSlotList();
 };
 
@@ -858,11 +897,12 @@ function renderTeamGrid() {
   const club = getActiveClub();
   if (!club) return;
   const slots = club.slots || {};
-  const canSwap = !S.swapPendingFrom;
+  const swapOpen = isSwapWindowOpen();
+  const alreadySwapped = hasSwappedToday(club);
+  const canSwap = swapOpen && !alreadySwapped && !S.swapPendingFrom;
 
   document.getElementById('teamGrid').innerHTML = TEAMS.map(t => {
     const count = slots[t.id] || 0;
-    const isFrom = S.swapPendingFrom === t.id;
     const isTarget = S.swapPendingFrom && S.swapPendingFrom !== t.id;
     let cls = 'team-card';
     if (count === 0 && !isTarget) cls += ' no-slots';
@@ -883,14 +923,35 @@ function renderTeamGrid() {
 
 function renderSwapBanner(club) {
   const banner = document.getElementById('swapBanner');
-  const swapped = club.swappedToday || false;
-  if (swapped) {
+  const swapOpen = isSwapWindowOpen();
+  const alreadySwapped = hasSwappedToday(club);
+  const today = todayIST();
+  const isMatchday = MATCHDAYS.includes(today);
+  const hour = hourIST();
+
+  if (alreadySwapped) {
+    // Used swap today
     banner.innerHTML = `<div class="swap-banner used">
-      <div><div class="swap-banner-text" style="color:var(--danger)">Swap used today</div><div class="swap-banner-sub">Come back after the next match to swap again</div></div>
+      <div><div class="swap-banner-text" style="color:var(--danger)">Swap used today</div>
+      <div class="swap-banner-sub">Next swap window opens at midnight IST on the next match day</div></div>
+    </div>`;
+  } else if (swapOpen) {
+    // Window is open right now
+    banner.innerHTML = `<div class="swap-banner open">
+      <div><div class="swap-banner-text" style="color:var(--warning)">🔄 Swap window open until noon IST</div>
+      <div class="swap-banner-sub">Tap a team card to move 1 slot elsewhere</div></div>
+    </div>`;
+  } else if (isMatchday && hour >= 12) {
+    // Match day but window closed (after noon)
+    banner.innerHTML = `<div class="swap-banner locked">
+      <div><div class="swap-banner-text" style="color:var(--text2)">Swap window closed</div>
+      <div class="swap-banner-sub">Opens at midnight IST on the next match day</div></div>
     </div>`;
   } else {
-    banner.innerHTML = `<div class="swap-banner open">
-      <div><div class="swap-banner-text" style="color:var(--warning)">1 swap available today</div><div class="swap-banner-sub">Tap a team card to move 1 slot elsewhere</div></div>
+    // Not a match day
+    banner.innerHTML = `<div class="swap-banner locked">
+      <div><div class="swap-banner-text" style="color:var(--text2)">No match today</div>
+      <div class="swap-banner-sub">Swap window opens midnight–noon IST on match days</div></div>
     </div>`;
   }
 }
@@ -898,7 +959,9 @@ function renderSwapBanner(club) {
 // ─── SWAP FLOW ───
 window.startSwap = function(teamId) {
   const club = getActiveClub();
-  if (!club || club.swappedToday) { toast('You have already swapped today'); return; }
+  if (!club) return;
+  if (!isSwapWindowOpen()) { toast('Swap window is closed. Opens midnight–noon IST on match days.'); return; }
+  if (hasSwappedToday(club)) { toast('You have already swapped today'); return; }
   S.swapPendingFrom = teamId;
   const team = TEAMS.find(t => t.id === teamId);
   toast(`Moving 1 slot from ${team ? team.name : teamId}. Pick target team.`);
@@ -918,6 +981,7 @@ window.startSwap = function(teamId) {
 window.confirmSwap = function(toTeamId) {
   const club = getActiveClub();
   if (!club || !S.swapPendingFrom) return;
+  if (!isSwapWindowOpen()) { toast('Swap window closed while you were deciding!'); cancelSwap(); return; }
   const fromTeamId = S.swapPendingFrom;
   if (!club.slots) club.slots = {};
   const fromCount = club.slots[fromTeamId] || 0;
@@ -926,13 +990,13 @@ window.confirmSwap = function(toTeamId) {
   club.slots[fromTeamId] = fromCount - 1;
   if (club.slots[fromTeamId] === 0) delete club.slots[fromTeamId];
   club.slots[toTeamId] = (club.slots[toTeamId] || 0) + 1;
-  club.swappedToday = true;
+  club.swappedOn = todayIST();   // store the date, not a boolean
 
   saveClubs();
   const {db,ref,update} = window._db;
   update(ref(db,`kicket/clubs/${club.code}/members/${S.uid}`), {
     slots: club.slots,
-    swappedToday: true
+    swappedOn: club.swappedOn
   });
 
   S.swapPendingFrom = null;
@@ -1044,15 +1108,13 @@ window.addMatchPoints = function() {
             const newScore = (member.score || 0) + matchPts;
             updates[`kicket/clubs/${clubCode}/members/${uid}/score`] = newScore;
           }
-          updates[`kicket/clubs/${clubCode}/members/${uid}/swappedToday`] = false;
+          // Note: swappedOn is NOT reset by admin anymore — it resets naturally by date
         });
       });
 
       updates['kicket/streaks'] = newStreaks;
 
       update(ref(db,'/'), updates).then(() => {
-        S.clubs.forEach(c => { c.swappedToday = false; });
-        saveClubs();
         TEAMS.forEach(t => document.getElementById('adm_'+t.id)?.classList.remove('on'));
         const streakMsg = winners.map(tid => {
           const s = newStreaks[tid];
@@ -1069,7 +1131,7 @@ window.addMatchPoints = function() {
 
 window.confirmReset = function() {
   if (confirm('Reset ALL points and streaks to zero? Cannot be undone.')) {
-    const {db,ref,get,update,remove} = window._db;
+    const {db,ref,get,update} = window._db;
     get(ref(db,'kicket/clubs')).then(snap => {
       if (!snap.exists()) return;
       const allClubs = snap.val();
@@ -1078,12 +1140,11 @@ window.confirmReset = function() {
         if (!club.members) return;
         Object.entries(club.members).forEach(([uid]) => {
           updates[`kicket/clubs/${code}/members/${uid}/score`] = 0;
-          updates[`kicket/clubs/${code}/members/${uid}/swappedToday`] = false;
         });
       });
       updates['kicket/streaks'] = null;
       update(ref(db,'/'), updates).then(() => {
-        S.clubs.forEach(c => { c.score = 0; c.swappedToday = false; });
+        S.clubs.forEach(c => { c.score = 0; });
         saveClubs();
         toast('All points and streaks reset!');
         closeModal('modal-admin');
