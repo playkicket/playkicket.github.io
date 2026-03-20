@@ -905,7 +905,7 @@ function renderTeamGrid() {
     const clickFn = canSwap && count > 0 ? `startSwap('${t.id}')` : (isTarget ? `confirmSwap('${t.id}')` : '');
 
     return `<div class="${cls}" onclick="${clickFn}">
-      <div class="team-card-name">${t.id}</div>
+      <div class="team-card-name" style="font-size:16px">${t.id}</div>
       <div class="team-card-slots">${count}</div>
       ${hint ? `<div class="team-card-swap-hint">${hint}</div>` : ''}
     </div>`;
