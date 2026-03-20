@@ -341,7 +341,7 @@ select option { background:white; color:var(--text); }
     <div id="squadPanel" style="display:none">
       <div id="swapBanner"></div>
       <div id="swapTargetWrap" style="display:none">
-        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px">Move 1 slot to which team?</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:10px">Choose a team to swap</div>
         <div id="swapTargetList"></div>
         <button class="btn btn-secondary" style="margin-top:8px;margin-bottom:16px" onclick="cancelSwap()">Cancel</button>
       </div>
@@ -468,14 +468,13 @@ const BASE_PTS = 10;
 const STREAK_BONUS = 5;
 
 // ─── LOCK DATE ───
-const ALLOC_LOCK_DATE = new Date('2026-03-20T06:30:00Z');
+const ALLOC_LOCK_DATE = new Date('2026-03-28T06:30:00Z');
 function isLocked() { return new Date() >= ALLOC_LOCK_DATE; }
 
 // ─── MATCHDAYS & SWAP WINDOW ───
 // Add or remove dates here as the schedule is confirmed.
 // Format: 'YYYY-MM-DD' in IST (just the date, no time).
 const MATCHDAYS = [
-  '2026-03-21',
   '2026-03-29',
   '2026-03-30',
   '2026-03-31',
