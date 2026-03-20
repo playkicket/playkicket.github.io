@@ -366,13 +366,11 @@ select option { background:white; color:var(--text); }
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-rules')">✕</button>
     <div class="modal-title">How Points Work</div>
-    <div class="modal-sub">IPL 2026 · Kicket scoring</div>
-    <div class="rule-row"><div class="rule-icon">🎯</div><div><div class="rule-title">Slots</div><div class="rule-desc">You have 11 slots to distribute across the 10 IPL teams. You choose how many slots each team gets.</div></div></div>
-    <div class="rule-row"><div class="rule-icon">🏆</div><div><div class="rule-title">Points per Win</div><div class="rule-desc">Each match a team wins, you earn 10 points for every slot you have on that team.</div></div></div>
-    <div class="rule-row"><div class="rule-icon">🔥</div><div><div class="rule-title">Streak Bonus</div><div class="rule-desc">Same team wins back to back? Bonus kicks in!<br>Win 1 → 10 pts · Win 2 → 15 pts · Win 3 → 20 pts · Win 4 → 25 pts (keeps going +5 per win)</div></div></div>
-    <div class="rule-row"><div class="rule-icon">💔</div><div><div class="rule-title">Streak Breaks</div><div class="rule-desc">Team loses → streak resets. Back to 10 pts per slot next win.</div></div></div>
-    <div class="rule-row"><div class="rule-icon">🔄</div><div><div class="rule-title">Daily Swap</div><div class="rule-desc">Once per matchday, move exactly 1 slot from one team to another. Swap window: midnight to noon IST on match days.</div></div></div>
-    <div class="rule-row"><div class="rule-icon">✅</div><div><div class="rule-title">No Negative Points</div><div class="rule-desc">Team loses = 0 points. Never penalised.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">Your picks</div><div class="rule-desc">You have 11 picks. Spread them across teams.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">Win = points</div><div class="rule-desc">Each win earns 10 points per pick on that team.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">Winning streaks</div><div class="rule-desc">Keep winning → earn more points each time (+5 per win).</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">Lose = reset</div><div class="rule-desc">Team loses → back to 10 points next win.</div></div></div>
+    <div class="rule-row"><div><div class="rule-title">No negatives</div><div class="rule-desc">No points lost. Ever.</div></div></div>
     <button class="btn btn-primary" style="margin-top:8px" onclick="closeModal('modal-rules')">Got it!</button>
   </div>
 </div>
