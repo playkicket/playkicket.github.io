@@ -908,7 +908,6 @@ function renderTeamGrid() {
       <div class="team-card-name">${t.id}</div>
       <div class="team-card-slots">${count}</div>
       <div class="team-card-slots-lbl">slot${count !== 1 ? 's' : ''}</div>
-      <div class="team-card-pts">${(club.score || 0)} pts total</div>
       ${hint ? `<div class="team-card-swap-hint">${hint}</div>` : ''}
     </div>`;
   }).join('');
